@@ -1,0 +1,69 @@
+#%RAML 0.8
+#baseUri: http://mocksvc.mulesoft.com/mocks/bbfab2be-5cdf-443a-acf7-67082fdd6d99
+title: acme.PurchaseOrderSystem.Ordering
+version: 1.0.development
+baseUri: http://localhost:8086/acme/SystemAPI/Ordering/1.0
+documentation:
+  - title: acme Purchase Order Api
+    content: This API Exposes the purchase Order syatems from acme System of record
+schemas: 
+  - orderitemsystem: !include  OrderItemSys.json
+  - ordersystem: !include ordersys.json
+/Orders: 
+    /{OrderId}: 
+      get: 
+        description: This resource gets Purchase Order entity for the given Order Id
+      
+    
+        responses: 
+          200: 
+            body:  
+              application/json:
+                schema: ordersystem
+                example: |
+                  {
+                    "order": {
+                      "orderId": "A001",
+                      "placementDate": "04/06/2016",
+                      "customerName": "AJAX"
+                    }
+                  }
+          400:
+            body:
+              application/json:
+                example: |
+                  {
+                    "message": "Order does not exist with given orderid"
+                  }
+      
+      /OrderItems:
+              get: 
+                description: This resource returns a list of OrderItems for given OrderId
+              
+            
+                responses: 
+                  200: 
+                    body:  
+                      application/json:
+                        schema: orderitemsystem
+                        example: |
+                          {
+                            "orderItems": {
+                              "orderitem": [
+                                {
+                                  "orderId": "A001",
+                                  "itemid": "I001",
+                                  "itemname": "AJAX SOAP",
+                                  "itemprice": 45.5,
+                                  "itemcount": 10
+                                }
+                              ]
+                            }
+                          }
+                  400:
+                    body:
+                      application/json:
+                        example: |
+                          {
+                            "message": "Order does not exist with given orderid"
+                                         

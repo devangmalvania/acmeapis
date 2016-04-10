@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd">
+<flow name="ordering.DAL.Order">
+    	<db:stored-procedure config-ref="Generic_Database_Configuration" doc:name="Database">
+            <db:parameterized-query><![CDATA[{CALL uspGetOrders(:OrderId)}]]></db:parameterized-query>
+            <db:in-param name="OrderId" type="VARCHAR" value="#[flowVars.OrderId]"/>
+        </db:stored-procedure>
+        <choice doc:name="if Order not found">
+            <when expression="#[payload.resultSet1.size() == 0]">
+                <logger message="Order Id Not found for Order " level="INFO" doc:name="Logger"/>
+                <scripting:component doc:name="Script throw not found error">
+				    <scripting:script engine="groovy">
+				        <![CDATA[
+					    throw new org.mule.module.apikit.exception.NotFoundException("Order ID does not exist!"); 
+					]]>
+				    </scripting:script>
+				</scripting:component>	
+            </when>
+            <otherwise>
+                <dw:transform-message metadata:id="50e6f77d-a749-4e4d-95b0-e12c1afdc72e" doc:name="Transform Message">
+                    <dw:input-payload doc:sample="list_resultSet1.dwl"/>
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	order: {
+		customerName:payload.resultSet1[0].CustomerName,
+		orderId: payload.resultSet1[0].OrderId,
+		placementDate: payload.resultSet1[0].PlacementDate
+	}
+}]]></dw:set-payload>
+                </dw:transform-message>
+            </otherwise>
+        </choice>
+
+    </flow>
+    <flow name="ordering.DAL.OrderItems">
+        <db:stored-procedure config-ref="Generic_Database_Configuration" doc:name="SQL_Database_OrdderItem">
+            <db:parameterized-query><![CDATA[{CALL uspGetOrderItems(:OrderId)}]]></db:parameterized-query>
+            <db:in-param name="OrderId" type="VARCHAR" value="#[flowVars.OrderId]"/>
+
+        </db:stored-procedure>
+        <choice doc:name="If Order not found">
+            <when expression="#[payload.resultSet1.size() == 0]">
+                <scripting:component doc:name="Script_Throw not found error">
+                    <scripting:script engine="groovy"><![CDATA[
+					    throw new org.mule.module.apikit.exception.NotFoundException("Order ID does not exist!"); 
+					]]></scripting:script>
+                </scripting:component>
+            </when>
+            <otherwise>
+                <dw:transform-message metadata:id="fa7274fc-73ac-4653-a809-74aef03fcefb" doc:name="Transform OrderItems">
+                    <dw:input-payload doc:sample="list_resultSet1.dwl"/>
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	"orderItems": {
+		"orderitem": payload.resultSet1  map                        
+        {
+          "orderId": $.OrderId,
+          "itemid": $.ItemId,
+          "itemname": $.ItemName,
+          "itemprice": $.ItemPrice,
+          "itemcount": $.ItemCount
+        }
+    }                        
+}]]></dw:set-payload>
+                </dw:transform-message>
+            </otherwise>
+        </choice>
+    </flow>
+</mule>

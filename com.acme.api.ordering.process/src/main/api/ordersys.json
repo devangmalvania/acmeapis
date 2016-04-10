@@ -1,0 +1,25 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "id": "/",
+    "type": "object",
+    "properties": {
+      "order": {
+        "id": "order",
+        "type": "object",
+        "properties": {
+          "orderId": {
+            "id": "orderId",
+            "type": "string"
+          },
+          "placementDate": {
+            "id": "placementDate",
+            "type": "string"
+          },
+          "customerName": {
+            "id": "customerName",
+            "type": "string"
+          }
+        }
+      }
+    }
+  }

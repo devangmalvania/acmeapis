@@ -1,0 +1,61 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "/",
+  "type": "object",
+  "properties": {
+    "order": {
+      "id": "order",
+      "type": "object",
+      "properties": {
+        "orderId": {
+          "id": "orderId",
+          "type": "string"
+        },
+        "placementDate": {
+          "id": "placementDate",
+          "type": "string"
+        },
+        "customerName": {
+          "id": "customerName",
+          "type": "string"
+        },
+        "orderItems": {
+          "id": "orderItems",
+          "type": "object",
+          "properties": {
+            "orderitem": {
+              "id": "orderitem",
+              "type": "array",
+              "items": {
+                "id": "0",
+                "type": "object",
+                "properties": {
+                  "orderId": {
+                    "id": "orderId",
+                    "type": "string"
+                  },
+                  "itemid": {
+                    "id": "itemid",
+                    "type": "string"
+                  },
+                  "itemname": {
+                    "id": "itemname",
+                    "type": "string"
+                  },
+                  "itemprice": {
+                    "id": "itemprice",
+                    "type": "number"
+                  },
+                  "itemcount": {
+                    "id": "itemcount",
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

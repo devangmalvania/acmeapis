@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:core="http://www.mulesoft.org/schema/mule/core" xmlns:scripting="http://www.mulesoft.org/schema/mule/scripting"
+	xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/scripting http://www.mulesoft.org/schema/mule/scripting/current/mule-scripting.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+<flow name="ordering.process.getorderdetails">
+        <scatter-gather doc:name="Scatter-Gather">
+            <custom-aggregation-strategy class="com.acme.api.ordering.components.OrderOrderItemsAggregator"/>
+            <processor-chain>
+                <http:request config-ref="HTTP_Request_Configuration" path="/Orders/{OrderId}" method="GET" doc:name="HTTP">
+                    <http:request-builder>
+                        <http:uri-param paramName="OrderId" value="#[flowVars.OrderId]"/>
+                    </http:request-builder>
+                </http:request>
+                <dw:transform-message  doc:name="Transform Message">
+                    <dw:set-payload><![CDATA[%dw 1.0
+%output application/json
+---
+{
+	order: {
+		customerName: payload.order.customerName,
+		orderId: payload.order.orderId,
+		placementDate: payload.order.placementDate,
+		orderItems: 123
+		
+	}
+}]]></dw:set-payload>
+                </dw:transform-message>
+                <object-to-string-transformer doc:name="Object to String"/>
+                <logger level="INFO" doc:name="Logger"/>
+            </processor-chain>
+            <processor-chain>
+                <http:request config-ref="HTTP_Request_Configuration" path="/Orders/{OrderId}/OrderItems" method="GET" doc:name="HTTP">
+                    <http:request-builder>
+                        <http:uri-param paramName="OrderId" value="#[flowVars.OrderId]"/>
+
+                    </http:request-builder>
+                </http:request>
+                <byte-array-to-string-transformer doc:name="Byte Array to String"/>
+                <logger level="INFO" doc:name="Logger"/>
+            </processor-chain>
+        </scatter-gather>
+        <response>
+            <logger level="INFO" doc:name="Logger"/>
+        </response>
+        <choice-exception-strategy doc:name="Choice Exception Strategy">
+            <catch-exception-strategy when="#[org.mule.util.StringUtils.contains(  exception.cause.message, &quot;404&quot;) == true]" doc:name="Catch 404">
+            	<logger message="Order Id Not found for Order " level="INFO" doc:name="Logger"/>
+                <scripting:component doc:name="Script throw not found error">
+				    <scripting:script engine="groovy">
+				        <![CDATA[
+					    throw new org.mule.module.apikit.exception.NotFoundException("Order ID does not exist!"); 
+					]]>
+				    </scripting:script>
+				</scripting:component>
+            </catch-exception-strategy>
+            
+        </choice-exception-strategy>
+
+
+    </flow>
+
+</mule>

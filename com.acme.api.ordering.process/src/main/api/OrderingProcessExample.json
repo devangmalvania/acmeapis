@@ -1,0 +1,25 @@
+{
+  "order": {
+    "customerName": "Ajax",
+    "orderId": "A001",
+    "placementDate": "2016-04-09T00:00:00",
+  "orderItems": {
+    "orderitem": [
+      {
+        "orderId": "A001",
+        "itemid": "I001",
+        "itemname": "Ajax Baby Powder",
+        "itemprice": 5.0000,
+        "itemcount": 7
+      },
+      {
+        "orderId": "A001",
+        "itemid": "I002",
+        "itemname": "Ajax washing Powder",
+        "itemprice": 5.0000,
+        "itemcount": 3
+      }
+    ]
+  }
+  }
+}

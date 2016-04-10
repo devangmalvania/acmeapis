@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+<http:request-config name="HTTP_Request_Configuration" host="${systemapiendpoint}" port="${systemapiport}" basePath="${sysapipath}" responseTimeout="30000" doc:name="HTTP Request Configuration">
+        <http:basic-authentication username="${sysapiusername}" password="Password1"/>
+        <http:raml-api-configuration location="Ordering.System.raml"/>
+    </http:request-config>
+ <http:listener-config name="http-lc-0.0.0.0-8081" host="${processapiendpoint}" port="8081" doc:name="HTTP Listener Configuration" />
+</mule>

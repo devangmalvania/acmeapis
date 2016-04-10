@@ -1,0 +1,21 @@
+#%RAML 0.8
+title: acme.PurchaseOrder.Process.Ordering
+version: 1.0
+baseUri: http://0.0.0.0:8081/acme/ProcessAPI/Ordering/1.0
+documentation:
+  - title: acme Purchase Order Process Api
+    content: This API Exposes the purchase Order processes from acme System of record. It performs enrichment on an order and adds order details.
+schemas: 
+  - orderingprocess: !include  orderingprocess.json
+/Orders: 
+    /{OrderId}: 
+      get: 
+        description: This resource gets Purchase Order detail for the given Order Id
+      
+    
+        responses: 
+          200: 
+            body:  
+              application/json:
+                schema: orderingprocess
+                example: !include OrderingProcessExample.json
